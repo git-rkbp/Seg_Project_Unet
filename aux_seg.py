@@ -78,7 +78,6 @@ def plot_images(images_list):
     plt.tight_layout()
     plt.show()
 
-
 def normalize_images(images):
     num_images = images.shape[0]
     normalzed_array = np.zeros(images.shape)
@@ -90,15 +89,17 @@ def normalize_images(images):
 
 
 
-im, ms = read_train_all()
-nm_im = normalize_images(im)
-
-print(nm_im.min(), nm_im.max())
-
-print("hello")
+# im, msk = read_train_all()
+# im_nm = normalize_images(im)
 
 
-print(im)
+
+
+
+
+
+
+
 
 
 
