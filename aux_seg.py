@@ -98,6 +98,9 @@ print(nm_im.min(), nm_im.max())
 print("hello")
 
 
+print(im)
+
+
 
 
 
