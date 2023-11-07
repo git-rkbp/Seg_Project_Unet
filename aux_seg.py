@@ -95,7 +95,7 @@ nm_im = normalize_images(im)
 
 print(nm_im.min(), nm_im.max())
 
-
+print("hello")
 
 
 
