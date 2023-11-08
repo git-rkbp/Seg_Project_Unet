@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torchvision import models
 from torch.nn.functional import relu
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader,random_split
 from sklearn.model_selection import train_test_split
 
 
@@ -49,25 +49,49 @@ class CustomDataset(Dataset):
         return sample['image'], sample['mask']
 
 
-im, np_targets = read_train_all()
-np_inputs = normalize_images(im)
-
-images_array = np_inputs
-masks_array = np_targets
-
+im, masks_array = read_train_all()
+images_array = normalize_images(im)
 
 # # Create the dataset
 dataset = CustomDataset(images_array, masks_array)
 
+# spliting the dataset
+dataset_size = len(dataset)
+train_size = int(dataset_size * 0.8)  # 80% for training
+val_size = dataset_size - train_size  # Remaining 20% for validation
+
+train_dataset, val_dataset = random_split(dataset, [train_size, val_size])
+
+
+
 # # Create the DataLoader
 data_loader = DataLoader(dataset, batch_size=4, shuffle=True, num_workers=2)
 
-# Now when you iterate over the dataloader, you will get batches from your array
-x, y = next(iter(data_loader))
+# Create data loaders for each split
+train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True, num_workers=2)
+val_loader = DataLoader(val_dataset, batch_size=4, shuffle=False, num_workers=2)
 
-print(f'x = shape: {x.shape}; type: {x.dtype}')
-print(f'x = min: {x.min()}; max: {x.max()}')
-print(f'y = shape: {y.shape}; class: {y.unique()}; type: {y.dtype}')
+
+
+
+# test 
+
+print(f"Total dataset size: {dataset_size}")
+print(f"Training dataset size: {len(train_dataset)}")
+print(f"Validation dataset size: {len(val_dataset)}")
+
+print(f"Number of batches in the training data loader: {len(train_loader)}")
+print(f"Number of batches in the validation data loader: {len(val_loader)}")
+
+# Fetch a batch from the training data loader
+train_images, train_masks = next(iter(train_loader))
+print(f"Shape of training images: {train_images.shape}")
+print(f"Shape of training masks: {train_masks.shape}")
+
+# Fetch a batch from the validation data loader
+val_images, val_masks = next(iter(val_loader))
+print(f"Shape of validation images: {val_images.shape}")
+print(f"Shape of validation masks: {val_masks.shape}")
 
 
 
