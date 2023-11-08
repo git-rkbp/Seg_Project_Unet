@@ -2,75 +2,73 @@ import torch
 import torch.nn as nn
 from torchvision import models
 from torch.nn.functional import relu
-from torch.utils import data
+from torch.utils.data import Dataset, DataLoader
+from sklearn.model_selection import train_test_split
 
 
 from aux_seg import *
 
 
+class CustomDataset(Dataset):
+    def __init__(self, images, masks, transform=None):
+    
+        """
+        # # Assuming you have your images and masks in two numpy arrays:
+        # # images_array: (250, 256, 256)
+        # # masks_array: (250, 256, 256)
 
-class SegmentationDataSet(data.Dataset):
-    def __init__(self,
-                 inputs,  # NumPy array of shape (250, 256, 256)
-                 targets, # NumPy array of shape (250, 256, 256)
-                 transform=None
-                 ):
-        self.inputs = inputs
-        self.targets = targets
+        Args:
+            images (numpy.ndarray): A numpy array of shape (N, H, W) containing the images.
+            masks (numpy.ndarray): A numpy array of shape (N, H, W) containing the segmentation masks.
+            transform (callable, optional): Optional transform to be applied on a sample.
+        """
+        self.images = images
+        self.masks = masks
         self.transform = transform
-        self.inputs_dtype = torch.float32
-        self.targets_dtype = torch.long
 
     def __len__(self):
-        return len(self.inputs)
+        return len(self.images)
 
-    def __getitem__(self, index: int):
-        # Select the sample
-        x = self.inputs[index]
-        y = self.targets[index]
+    def __getitem__(self, idx):
+        image = self.images[idx]
+        mask = self.masks[idx]
 
-        # Preprocessing
-        if self.transform is not None:
-            x, y = self.transform(x, y)
+        # Add channel dimension: PyTorch expects images in the shape (C, H, W)
+        image = np.expand_dims(image, axis=0)
+        mask = np.expand_dims(mask, axis=0)
 
-        # If the array has only one channel and you want to add a channel dimension:
-        # x = x[None, ...]  # This adds a channel dimension (assuming channel-first convention)
-        # y = y[None, ...]  # This adds a channel dimension (assuming channel-first convention)
+        sample = {'image': image, 'mask': mask}
 
-        # Typecasting
-        x = torch.from_numpy(x).type(self.inputs_dtype)
-        y = torch.from_numpy(y).type(self.targets_dtype)
+        if self.transform:
+            sample = self.transform(sample)
 
-        return x, y
+        # Convert to PyTorch tensors
+        sample['image'] = torch.from_numpy(sample['image']).float()
+        sample['mask'] = torch.from_numpy(sample['mask']).long()  # Assuming mask has integer type labels
 
-# Assume np_inputs is your input images array of shape (250, 256, 256)
-# and np_targets is your target images array of the same shape
-# np_inputs = ...
-# np_targets = ...
-
+        return sample['image'], sample['mask']
 
 
 im, np_targets = read_train_all()
 np_inputs = normalize_images(im)
 
+images_array = np_inputs
+masks_array = np_targets
 
 
+# # Create the dataset
+dataset = CustomDataset(images_array, masks_array)
 
-
-training_dataset = SegmentationDataSet(inputs=np_inputs,
-                                       targets=np_targets,
-                                       transform=None)
-
-training_dataloader = data.DataLoader(dataset=training_dataset,
-                                      batch_size=2,
-                                      shuffle=True)
+# # Create the DataLoader
+data_loader = DataLoader(dataset, batch_size=4, shuffle=True, num_workers=2)
 
 # Now when you iterate over the dataloader, you will get batches from your array
-x, y = next(iter(training_dataloader))
+x, y = next(iter(data_loader))
 
 print(f'x = shape: {x.shape}; type: {x.dtype}')
+print(f'x = min: {x.min()}; max: {x.max()}')
 print(f'y = shape: {y.shape}; class: {y.unique()}; type: {y.dtype}')
-# x = shape: torch.Size([2, 256, 256]); type: torch.float32
-# y = shape: torch.Size([2, 256, 256]); class: tensor([0, 1, 2, 3, 4]); type: torch.int64
+
+
 
 
