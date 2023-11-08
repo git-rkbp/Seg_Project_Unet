@@ -94,5 +94,19 @@ print(f"Shape of validation images: {val_images.shape}")
 print(f"Shape of validation masks: {val_masks.shape}")
 
 
+# Check if CUDA is available
+is_cuda_available = torch.cuda.is_available()
+print(f"CUDA available: {is_cuda_available}")
+
+# If CUDA is available, print the GPU name (or names, if there are multiple GPUs)
+if is_cuda_available:
+    gpu_count = torch.cuda.device_count()
+    print(f"Number of GPUs: {gpu_count}")
+    for i in range(gpu_count):
+        gpu_name = torch.cuda.get_device_name(i)
+        print(f"GPU {i} Name: {gpu_name}")
+else:
+    print("No CUDA-enabled GPU is available.")
+
 
 
