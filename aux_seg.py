@@ -40,7 +40,7 @@ def read_train_all():
     im_tp = np.transpose(imgs_concatenated, (2, 0, 1))
     ms_tp = np.transpose(mask_concatenated, (2, 0, 1))
 
-    return im_tp, ms_tp  
+    return im_tp, ms_tp.astype(int)  
 
 def plot_images(images_list):
     
@@ -87,10 +87,35 @@ def normalize_images(images):
         
     return normalzed_array
 
+def spliting_the_segmentation_mask(masks, num_classes):
+    num_images = masks.shape[0]
+    splited_mask = np.zeros((masks.shape[0], num_classes,masks.shape[1], masks.shape[2]))
+
+    for i in range(num_images):
+        for j in range(num_classes):
+        
+            splited_mask[i,j] = (masks[i] == j).astype(int)
+
+    return splited_mask
 
 
-# im, msk = read_train_all()
-# im_nm = normalize_images(im)
+
+
+
+if __name__ == '__main__':
+
+    im, msk = read_train_all()
+    msk = msk.astype(int)
+    img_nm = normalize_images(im)
+    msk_sp = spliting_the_segmentation_mask(msk, 5)
+
+    a = msk_sp[25,0]
+    b = msk_sp[25,1]
+    c = msk_sp[25,2]
+    d = msk_sp[25,3]
+    e = msk_sp[25,4]
+
+    plot_images([a,b,c,d,e])
 
 
 
