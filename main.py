@@ -69,21 +69,26 @@ class CustomDataset(Dataset):
         if mask.shape[0] == 1:
             mask = mask[0]
 
+
+        mask = mask.astype(np.float32)
+
         sample = {'image': image, 'mask': mask}
 
         if self.transform:
             sample = self.transform(sample)
 
         sample['image'] = torch.from_numpy(sample['image']).float()
-        sample['mask'] = torch.from_numpy(sample['mask']).long()
+        sample['mask'] = torch.from_numpy(sample['mask']).float()
 
         return sample['image'], sample['mask']
 
 
 
+NUM_OF_CLASSES = 5
 
-im, masks_array = read_train_all()
+im, ms = read_train_all()
 images_array = normalize_images(im)
+masks_array = spliting_the_segmentation_mask(ms,NUM_OF_CLASSES)
 
 # # Create the dataset
 dataset = CustomDataset(images_array, masks_array)
@@ -170,6 +175,7 @@ for epoch in range(num_epochs):
 
 print("Training finished")
 
+torch.save(model.state_dict(), './checkpoint/model.pth')
 
 
 
