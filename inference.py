@@ -44,8 +44,8 @@ print("max = ",np.max(output_np[3]))
 print("min = ",np.min(output_np[3]))
 
 
-treshold = -0.2
-output_np[output_np < treshold ] = 0  
+# treshold = -0.2
+# output_np[output_np < treshold ] = 0  
 
 
 

@@ -78,7 +78,7 @@ class CustomDataset(Dataset):
             sample = self.transform(sample)
 
         sample['image'] = torch.from_numpy(sample['image']).float()
-        sample['mask'] = torch.from_numpy(sample['mask']).float()
+        sample['mask'] = torch.from_numpy(sample['mask']).long()
 
         return sample['image'], sample['mask']
 
@@ -86,9 +86,9 @@ class CustomDataset(Dataset):
 
 NUM_OF_CLASSES = 5
 
-im, ms = read_train_all()
-images_array = normalize_images(im)
-masks_array = spliting_the_segmentation_mask(ms,NUM_OF_CLASSES)
+images_array, masks_array = read_train_all()
+images_array = normalize_images(images_array)
+# masks_array = spliting_the_segmentation_mask(masks_array, NUM_OF_CLASSES)
 
 # # Create the dataset
 dataset = CustomDataset(images_array, masks_array)
@@ -140,6 +140,7 @@ model = UNet_256(n_class=5).to(device)
 
 # Define the loss function (e.g., Cross-Entropy Loss)
 criterion = nn.CrossEntropyLoss()
+
 
 # Define the optimizer (e.g., Adam)
 optimizer = optim.Adam(model.parameters(), lr=0.001)
